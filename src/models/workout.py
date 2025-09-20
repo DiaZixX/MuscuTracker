@@ -30,7 +30,7 @@ class Workout:
         """
         Visualization of the object
         """
-        return f"[Workout] Date : {self.date} | "
+        return f"[Workout] Date : {self.date}\n{self.all_exercises}"
 
     def add_performance(self, exercise: Exercise, performance: Performance) -> None:
         """
