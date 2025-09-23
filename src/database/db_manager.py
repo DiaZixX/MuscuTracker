@@ -107,3 +107,55 @@ class DBManager:
         except sql.Error as e:
             print(f"[Error] Error while adding a performance : {e}")
             return -1
+
+    def get_workouts(self) -> Optional[list[sql.Row]]:
+        try:
+            with self.con:
+                cursor = self.con.execute("SELECT * FROM workouts ORDER BY date DESC")
+                return cursor.fetchall()
+        except sql.Error as e:
+            print(f"[Error] Error while getting the workouts : {e}")
+            return None
+
+    def get_last_workout(self) -> Optional[sql.Row]:
+        try:
+            with self.con:
+                cursor = self.con.execute("SELECT * FROM workouts ORDER BY date DESC LIMIT 1")
+                return cursor.fetchone()
+        except sql.Error as e:
+            print(f"[Error] Error while getting last workout : {e}")
+            return None
+
+    def get_exercises(self, category: Optional[str] = None) -> Optional[list[sql.Row]]:
+        try:
+            with self.con:
+                if category:
+                    cursor = self.con.execute(
+                        "SELECT * FROM exercises WHERE category = ? ORDER BY name ASC",
+                        (category,),
+                    )
+                else:
+                    cursor = self.con.execute("SELECT * FROM exercises ORDER BY name ASC")
+                return cursor.fetchall()
+        except sql.Error as e:
+            print(f"[Error] Error while listing the exercises : {e}")
+            return None
+
+    def exercise_history(self, name: str) -> Optional[list[sql.Row]]:
+        try:
+            with self.con:
+                cursor = self.con.execute(
+                    """
+                    SELECT p.id, w.date, e.name, p.reps, p.weight, p.rpe
+                    FROM performances p
+                    JOIN workouts w ON p.workout_id = w.id
+                    JOIN exercises e ON p.exercise_id = e.id
+                    WHERE e.name = ?
+                    ORDER BY w.date ASC
+                    """,
+                    (name,),
+                )
+                return cursor.fetchall()
+        except sql.Error as e:
+            print(f"[Error] Error while getting history of an exercise : {e}")
+            return None
