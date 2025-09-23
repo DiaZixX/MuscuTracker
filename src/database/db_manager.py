@@ -9,6 +9,7 @@ class DBManager:
         self.con = sql.connect(db_path)
         self.cur = self.con.cursor()
         self.con.execute("PRAGMA foreign_keys = ON;")  # Enable the foreign key logic
+        self.con.row_factory = sql.Row  # Make the return of a SELECT be a dict instead of tuples
 
     def __del__(self):
         self.con.close()
@@ -31,7 +32,7 @@ class DBManager:
                     """
                     CREATE TABLE IF NOT EXISTS exercises (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT NOT NULL,
+                        name TEXT NOT NULL UNIQUE,
                         category TEXT NOT NULL,
                         notes TEXT
                     );
