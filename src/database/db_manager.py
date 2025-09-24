@@ -159,3 +159,34 @@ class DBManager:
         except sql.Error as e:
             print(f"[Error] Error while getting history of an exercise : {e}")
             return None
+
+    def exercise_1rm(self, name: str) -> Optional[sql.Row]:
+        try:
+            with self.con:
+                # The Epley method is used to compute the 1RM
+                cursor = self.con.execute(
+                    """
+                    SELECT
+                    MAX(p.weight * (1 + p.reps / 30.0)) AS estimated_1RM
+                    FROM performances p
+                    JOIN exercises e ON p.exercise_id = e.id
+                    WHERE e.name = ?
+                    """,
+                    (name,),
+                )
+                return cursor.fetchone()
+        except sql.Error as e:
+            print(f"[Error] Error while getting the 1RM of an exercise : {e}")
+            return None
+
+    def exercise_category(self, name: str) -> Optional[sql.Row]:
+        try:
+            with self.con:
+                cursor = self.con.execute(
+                    "SELECT category FROM exercises WHERE name = ?",
+                    (name,),
+                )
+                return cursor.fetchone()
+        except sql.Error as e:
+            print(f"[Error] Error while getting the category of an exercise : {e}")
+            return None
