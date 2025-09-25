@@ -141,6 +141,18 @@ class DBManager:
             print(f"[Error] Error while listing the exercises : {e}")
             return None
 
+    def get_from_partial_name(self, partial_name: str) -> Optional[sql.Row]:
+        try:
+            with self.con:
+                cursor = self.con.execute(
+                    "SELECT * FROM exercises WHERE name LIKE ?",
+                    (partial_name,),
+                )
+                return cursor.fetchone()
+        except sql.Error as e:
+            print(f"[Error] Error while trying to find a likely name : {e}")
+            return None
+
     def exercise_history(self, name: str) -> Optional[list[sql.Row]]:
         try:
             with self.con:
@@ -177,6 +189,26 @@ class DBManager:
                 return cursor.fetchone()
         except sql.Error as e:
             print(f"[Error] Error while getting the 1RM of an exercise : {e}")
+            return None
+
+    def exercise_best_perf(self, name: str) -> Optional[sql.Row]:
+        try:
+            with self.con:
+                cursor = self.con.execute(
+                    """
+                    SELECT p.weight, p.reps, p.rpe, w.date
+                    FROM performances p
+                    JOIN exercises e ON p.exercise_id = e.id
+                    JOIN workouts w ON p.workout_id = w.id
+                    WHERE e.name = ?
+                    ORDER BY p.weight DESC, p.reps DESC
+                    LIMIT 1
+                    """,
+                    (name,),
+                )
+                return cursor.fetchone()
+        except sql.Error as e:
+            print(f"[Error] Error while getting the best performance of an exercise : {e}")
             return None
 
     def exercise_category(self, name: str) -> Optional[sql.Row]:
