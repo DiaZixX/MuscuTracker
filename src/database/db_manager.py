@@ -222,3 +222,34 @@ class DBManager:
         except sql.Error as e:
             print(f"[Error] Error while getting the category of an exercise : {e}")
             return None
+
+    def update_performance(self, id_perf: int, reps: int, weight: float, rpe: Optional[int] = None) -> int:
+        try:
+            with self.con:
+                self.con.execute(
+                    """
+                    UPDATE performances
+                    SET reps = ?, weight = ?, rpe = ?
+                    WHERE id = ?
+                    """,
+                    (reps, weight, rpe, id_perf),
+                )
+                return 0
+        except sql.Error as e:
+            print(f"[Error] Error while updating performance : {e}")
+            return -1
+
+    def delete_workout(self, id_workout: int) -> int:
+        try:
+            with self.con:
+                self.con.execute(
+                    """
+                    DELETE FROM performances WHERE workout_id = ?;
+                    DELETE FROM workouts WHERE id = ?;
+                    """,
+                    (id_workout, id_workout),
+                )
+                return 0
+        except sql.Error as e:
+            print(f"[Error] Error while deleting a workout : {e}")
+            return -1
